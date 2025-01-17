@@ -1,0 +1,46 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #202020;
+  color: white;
+  background-color: transparent;
+}
+
+.navigation-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Style for the Today button */
+.today-button {
+  margin-left: 10px;
+  padding: 6px 12px;
+  border: none;
+  background-color: #3d5afe;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.today-button:hover {
+  background-color: #535bf2;
+}
+
+.logout-button {
+  background-color: #3d5afe;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.logout-button:hover {
+  background-color: #535bf2;
+}

@@ -1,0 +1,150 @@
+h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+button {
+  background-color: white;
+  border: none;
+  border-radius: 8px;
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  padding: 0.6em 1.2em;
+  transition: color 0.25s, background-color 0.25s;
+}
+
+button:hover {
+  background-color: #535bf2;
+  color: white;
+}
+
+button:focus {
+  outline: none;
+}
+
+.login-button {
+  margin-top: 1em;
+}
+
+.login-button:hover {
+  background-color: #535bf2;
+  color: white;
+}
+
+.login-box {
+  animation: fadeIn 1s ease-in-out;
+  background: #202020;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  padding: 30px;
+  text-align: center;
+  width: 300px;
+}
+
+.login-container {
+  align-items: center;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  width: 100%;
+}
+
+.login-input {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+  outline: none;
+  padding: 10px;
+  width: 100%;
+}
+
+.login-input:focus {
+  box-shadow: 0 0 8px white;
+}
+
+.login-title {
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  background: #ffe6e6;
+  border-radius: 8px;
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-bottom: 10px;
+  padding: 8px;
+  text-align: center;
+}
+
+.form-group {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.form-label {
+  color: white;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input {
+  padding-right: 60px;
+}
+
+.show-password-btn {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: black;
+  cursor: pointer;
+  font-size: 12px;
+  height: 50%;
+  padding: 0 10px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: background 0.3s ease;
+}
+
+.show-password-btn:hover {
+  background: #3d5afe;
+  color: white;
+}
+
+@keyframes auroraEffect {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

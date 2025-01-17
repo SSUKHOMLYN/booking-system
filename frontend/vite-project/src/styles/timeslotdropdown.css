@@ -1,0 +1,13 @@
+.time-slot-dropdown {
+  margin-bottom: 10px;
+}
+
+.book-appointment-button {
+  background-color: #3d5afe;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  padding: 10px 20px;
+  width: 100%;
+}

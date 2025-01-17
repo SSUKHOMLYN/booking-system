@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e1e1e, #282828, #121212, #404040);
+  background-size: 400% 400%;
+  animation: auroraEffect 10s ease-in-out infinite;
+  color: white;
+}
+
+h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#calendar {
+  max-width: 900px;
+  margin: 50px auto;
+  background-color: #1e1e1e;
+  color: white;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+}
+
+.container {
+  box-sizing: border-box;
+  margin: 20px auto;
+  max-width: 1200px;
+  padding: 20px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  .container {
+    padding: 10px;
+  }
+}
