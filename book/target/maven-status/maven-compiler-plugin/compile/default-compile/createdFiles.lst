@@ -1,0 +1,14 @@
+com\booking\book\mapper\SlotResourceAssembler.class
+com\booking\book\model\SlotResource.class
+com\booking\book\service\SlotService.class
+com\booking\book\repository\SlotRepository.class
+com\booking\book\controller\AdminController.class
+com\booking\book\model\SlotStatus.class
+com\booking\book\repository\UserRepository.class
+com\booking\book\model\User.class
+com\booking\book\controller\SlotController.class
+com\booking\book\model\Slots.class
+com\booking\book\ServletInitializer.class
+com\booking\book\BookApplication.class
+com\booking\book\service\UserService.class
+com\booking\book\controller\UserController.class
