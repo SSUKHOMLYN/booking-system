@@ -14,11 +14,14 @@ const CalendarPage = ({ role }) => {
   const fetchAllAdminAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8081/admin/slots", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/admin/slots`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch all admin slots");
       }
@@ -34,7 +37,7 @@ const CalendarPage = ({ role }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:8081/admin/slots/${slotId}`,
+        `${process.env.REACT_APP_API_URL}/admin/slots/${slotId}`,
         {
           method: "DELETE",
           headers: {
@@ -60,7 +63,7 @@ const CalendarPage = ({ role }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:8081/admin/slots/${slotId}`,
+        `${process.env.REACT_APP_API_URL}/admin/slots/${slotId}`,
         {
           method: "PUT",
           headers: {
@@ -150,7 +153,7 @@ const CalendarPage = ({ role }) => {
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8081/slots", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/slots`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -257,21 +260,24 @@ const CalendarPage = ({ role }) => {
       }
 
       // Build the new appointment
-      const response = await fetch("http://localhost:8081/slots/book", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          date: selectedDay,
-          time: convertedTime,
-          username,
-          roomNumber: generateRoomNumber(),
-          registrarName: "Registrar Name",
-          status: "BOOKED",
-        }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/slots/book`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            date: selectedDay,
+            time: convertedTime,
+            username,
+            roomNumber: generateRoomNumber(),
+            registrarName: "Registrar Name",
+            status: "BOOKED",
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -317,14 +323,17 @@ const CalendarPage = ({ role }) => {
       const newDate = selectedDay;
       const newTime = convertTo24HourFormat(timeSlot);
 
-      const response = await fetch("http://localhost:8081/slots/appointment", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ date: newDate, time: newTime }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/slots/appointment`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ date: newDate, time: newTime }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -362,7 +371,7 @@ const CalendarPage = ({ role }) => {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:8081/slots/appointment/delete",
+        `${process.env.REACT_APP_API_URL}/slots/appointment/delete`,
         {
           method: "DELETE",
           headers: {
@@ -588,38 +597,38 @@ const CalendarPage = ({ role }) => {
       </div>
       {role === "ADMIN" && (
         <div className="admin-panel">
-        <h2>All Booked Appointments (Admin)</h2>
-        {adminAppointments.map((slot) => (
-          <div key={slot.id} className="appointment-container">
-            <div className="appointment-info">
-              <p>Slot ID: {slot.id}</p>
-              <p>User ID: {slot.userId}</p>
-              <p>Date: {slot.date}</p>
-              <p>Time: {slot.time}</p>
-              <p>Room: {slot.roomNumber}</p>
-              <p>Registrar: {slot.registrarName}</p>
+          <h2>All Booked Appointments (Admin)</h2>
+          {adminAppointments.map((slot) => (
+            <div key={slot.id} className="appointment-container">
+              <div className="appointment-info">
+                <p>Slot ID: {slot.id}</p>
+                <p>User ID: {slot.userId}</p>
+                <p>Date: {slot.date}</p>
+                <p>Time: {slot.time}</p>
+                <p>Room: {slot.roomNumber}</p>
+                <p>Registrar: {slot.registrarName}</p>
+              </div>
+              <div className="appointment-buttons">
+                <button
+                  className="appointment-button"
+                  onClick={() =>
+                    handleAdminUpdate(slot.id, {
+                      /* updated data */
+                    })
+                  }
+                >
+                  Update
+                </button>
+                <button
+                  className="appointment-button"
+                  onClick={() => handleAdminDelete(slot.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="appointment-buttons">
-              <button
-                className="appointment-button"
-                onClick={() =>
-                  handleAdminUpdate(slot.id, {
-                    /* updated data */
-                  })
-                }
-              >
-                Update
-              </button>
-              <button
-                className="appointment-button"
-                onClick={() => handleAdminDelete(slot.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
     </div>
   );

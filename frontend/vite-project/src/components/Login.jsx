@@ -21,11 +21,14 @@ const LoginPage = ({ onLogin }) => {
     try {
       // Backend Note: The `/auth/login` endpoint is expected to validate the username and password.
       // It should return a token upon successful authentication or an error message if authentication fails.
-      const response = await fetch("/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }, // Backend Note: Ensure the API accepts JSON
-        body: JSON.stringify({ username, password }), // Send username and password as JSON
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }, // Backend Note: Ensure the API accepts JSON
+          body: JSON.stringify({ username, password }), // Send username and password as JSON
+        }
+      );
 
       if (response.ok) {
         // Backend Note: The response should include a token for user authentication.
