@@ -1,5 +1,9 @@
 {
   "scripts": {
     "heroku-postbuild": "cd frontend/vite-project && npm install && npm run build"
+  },
+  "engines": {
+    "node": "20.14.0",
+    "npm": "10.9.2npm"
   }
 }
