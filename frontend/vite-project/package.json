@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "build": "vite build",
     "start": "serve -s dist",
-    "heroku-postbuild": "npm run build"
+    "postinstall": "npm install && npm run build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
