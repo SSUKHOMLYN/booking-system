@@ -1,3 +1,4 @@
+com\booking\book\controller\HomeController.class
 com\booking\book\mapper\SlotResourceAssembler.class
 com\booking\book\model\SlotResource.class
 com\booking\book\service\SlotService.class
