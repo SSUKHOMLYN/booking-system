@@ -1,6 +1,6 @@
 {
   "script": {
-    "start": "cd frontend/vite-project && npm serve -s dist"
+    "start": "cd frontend/vite-project && npm start"
   },
   "engines": {
     "node": "20.14.0",
