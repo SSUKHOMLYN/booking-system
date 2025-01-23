@@ -23,7 +23,7 @@
                 <executions>
                     <!-- Run npm install -->
                     <execution>
-                        <id>npx-install</id>
+                        <id>npm-install</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>exec</goal>
@@ -45,7 +45,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>vite-project</workingDirectory>
-                            <executable>npm</executable>
+                            <executable>npx</executable>
                             <arguments>
                                 <argument>run</argument>
                                 <argument>build</argument>
