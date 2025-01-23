@@ -1,9 +1,0 @@
-{
-  "script": {
-    "start": "cd frontend/vite-project && npm start"
-  },
-  "engines": {
-    "node": "20.14.0",
-    "npm": "10.9.2"
-  }
-}
