@@ -38,14 +38,14 @@
                     </execution>
                     <!-- Run npm run build -->
                     <execution>
-                        <id>npx-build</id>
+                        <id>npm-build</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
                             <workingDirectory>vite-project</workingDirectory>
-                            <executable>npx</executable>
+                            <executable>npm</executable>
                             <arguments>
                                 <argument>run</argument>
                                 <argument>build</argument>
