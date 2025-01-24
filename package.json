@@ -1,0 +1,8 @@
+{
+    "name": "booking-application",
+    "private": true,
+    "scripts": {
+      "heroku-postbuild": "cd frontend/vite-project && npm install && npm run build"
+    }
+  }
+  
