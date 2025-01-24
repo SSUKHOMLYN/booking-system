@@ -23,6 +23,7 @@ const CalendarPage = ({ role }) => {
         throw new Error("Failed to fetch all admin slots");
       }
       const data = await response.json();
+      console.log("Admin appointments data:", data); // Debugging
       setAdminAppointments(data);
     } catch (err) {
       console.error(err);
@@ -43,11 +44,10 @@ const CalendarPage = ({ role }) => {
         }
       );
       if (response.ok) {
-        console.log(`Deleted slot ${slotId} successfully`);
-        // refetch
+        alert("Admin: Slot deleted successfully!"); // Add this
         fetchAllAdminAppointments();
       } else {
-        console.error("Failed to delete slot");
+        alert("Failed to delete slot");
       }
     } catch (err) {
       console.error(err);
@@ -71,10 +71,10 @@ const CalendarPage = ({ role }) => {
         }
       );
       if (response.ok) {
-        console.log("Updated slot successfully");
+        alert("Admin: Slot updated successfully!"); // Add this
         fetchAllAdminAppointments();
       } else {
-        console.error("Failed to update slot");
+        alert("Failed to update slot");
       }
     } catch (err) {
       console.error(err);
@@ -150,32 +150,38 @@ const CalendarPage = ({ role }) => {
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8081/slots", {
+      const response = await fetch("https://book-service.herokuapp.com/slots", {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
+
       const data = await response.json();
 
-      // Convert backend dates to local dates
+      // Convert backend dates to ISO format and extract date part
       const convertedAppointments = data.map((app) => ({
         ...app,
-        date: new Date(app.date).toISOString().split("T")[0], // Adjust to local date
+        date: new Date(app.date).toISOString().split("T")[0], // Standard ISO format
+        time: app.time.split(":").slice(0, 2).join(":"), // Remove seconds if present
       }));
+
       setAppointments(convertedAppointments);
 
-      // Find current user’s appointment
+      // Find current user's appointment using the decoded user ID
       const userApp = convertedAppointments.find(
-        (app) => app.userId === userid
+        (app) => app.userId === userid // Ensure this matches your data structure
       );
+
       setUserAppointment(userApp || null);
     } catch (error) {
       console.error("Error fetching appointments:", error);
+      setAppointments([]); // Reset on error
+      setUserAppointment(null);
     }
   };
 
@@ -186,29 +192,23 @@ const CalendarPage = ({ role }) => {
     setAppointmentErrorMessage("");
     setAppointmentSuccessMessage("");
 
+    // Convert to ISO date string (YYYY-MM-DD)
+    const isoDate = clickedDate.toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
+
     // Prevent selecting past or same-day
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (clickedDate <= today) {
+    if (isoDate <= today) {
       setBookingErrorMessage("Booking unavailable for the selected date.");
       setSelectedDay(null);
       return;
     }
 
-    // Fix "day behind" issue by creating a date at local midnight
-    const localDate = new Date(
-      clickedDate.getFullYear(),
-      clickedDate.getMonth(),
-      clickedDate.getDate()
-    );
-    // Optionally set to noon:
-    // localDate.setHours(12, 0, 0, 0);
-
-    setSelectedDay(localDate.toISOString().split("T")[0]);
+    // Update state with ISO formatted date
+    setSelectedDay(isoDate);
     setTimeSlot("");
-    setCurrentDate(localDate);
+    setCurrentDate(clickedDate);
   };
-
+  
   // “Today” button
   const handleTodayClick = () => {
     setCurrentDate(new Date());
@@ -257,7 +257,7 @@ const CalendarPage = ({ role }) => {
       }
 
       // Build the new appointment
-      const response = await fetch("http://localhost:8081/slots/book", {
+      const response = await fetch("https://book-service.herokuapp.com/slots/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -279,6 +279,11 @@ const CalendarPage = ({ role }) => {
           errorData.error || "Failed to book appointment."
         );
         return;
+      } else {
+        alert("Appointment booked successfully!"); // Add this
+        fetchAppointments();
+        setSelectedDay(null);
+        setTimeSlot("");
       }
 
       // Success -> refresh
@@ -299,7 +304,6 @@ const CalendarPage = ({ role }) => {
   const handleUpdateAppointment = async () => {
     try {
       setAppointmentErrorMessage("");
-      setAppointmentSuccessMessage("");
 
       if (!userAppointment) {
         setAppointmentErrorMessage("No existing appointment to update.");
@@ -317,7 +321,7 @@ const CalendarPage = ({ role }) => {
       const newDate = selectedDay;
       const newTime = convertTo24HourFormat(timeSlot);
 
-      const response = await fetch("http://localhost:8081/slots/appointment", {
+      const response = await fetch("https://book-service.herokuapp.com/slots/appointment", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -330,19 +334,11 @@ const CalendarPage = ({ role }) => {
         const errorData = await response.json();
         setAppointmentErrorMessage(errorData.error || "Failed to update.");
         return;
+      } else {
+        const updatedSlot = await response.json();
+        alert("Appointment updated successfully!"); // Add this
+        fetchAppointments();
       }
-
-      const updatedSlot = await response.json();
-      console.log("Appointment updated:", updatedSlot);
-
-      // Immediately reflect new details
-      setUserAppointment(updatedSlot);
-
-      // Show success message
-      setAppointmentSuccessMessage("Appointment Updated Successfully");
-
-      // Optionally refetch all to sync
-      fetchAppointments();
     } catch (error) {
       console.error("Error updating appointment:", error);
       setAppointmentErrorMessage("Error updating appointment.");
@@ -353,7 +349,6 @@ const CalendarPage = ({ role }) => {
   const handleCancelAppointment = async () => {
     try {
       setAppointmentErrorMessage("");
-      setAppointmentSuccessMessage("");
 
       if (!userAppointment) {
         setAppointmentErrorMessage("No existing appointment to delete.");
@@ -362,7 +357,7 @@ const CalendarPage = ({ role }) => {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "http://localhost:8081/slots/appointment/delete",
+        "https://book-service.herokuapp.com/slots/appointment/delete",
         {
           method: "DELETE",
           headers: {
@@ -374,16 +369,11 @@ const CalendarPage = ({ role }) => {
       if (!response.ok) {
         setAppointmentErrorMessage("Failed to cancel appointment.");
         return;
+      } else {
+        alert("Appointment deleted successfully!"); // Add this
+        setUserAppointment(null);
+        fetchAppointments();
       }
-
-      console.log("Appointment cancelled successfully.");
-      setAppointmentSuccessMessage("Appointment Deleted Successfully");
-
-      // Clear out local userAppointment
-      setUserAppointment(null);
-
-      // Optionally refetch all to confirm changes
-      fetchAppointments();
     } catch (error) {
       console.error("Error cancelling appointment:", error);
       setAppointmentErrorMessage("Error cancelling appointment.");
@@ -500,8 +490,15 @@ const CalendarPage = ({ role }) => {
               if (date.toDateString() === new Date().toDateString()) {
                 return "react-calendar__tile--now";
               }
+
+              // Highlight selected day (compare local dates)
+              const tileYear = date.getFullYear();
+              const tileMonth = String(date.getMonth() + 1).padStart(2, "0");
+              const tileDay = String(date.getDate()).padStart(2, "0");
+              const tileDateStr = `${tileYear}-${tileMonth}-${tileDay}`;
+
               // highlight user-selected day
-              if (selectedDay === date.toISOString().split("T")[0]) {
+              if (selectedDay === tileDateStr) {
                 return "react-calendar__tile--user-selected";
               }
               return null;
@@ -537,15 +534,15 @@ const CalendarPage = ({ role }) => {
               </button>
             </div>
           )}
-
           {/* Booking errors */}
           {bookingErrorMessage && (
             <div className="error-message">{bookingErrorMessage}</div>
           )}
-
-          {/* The Appointment Container (shows if user has an appointment or success msg) */}
+          The Appointment Container (shows if user has an appointment or success
+          msg)
           <div className="appointment-container">
             {/* Left side: either success or appointment details */}
+            {/* Before */}
             <div className="appointment-info">
               {appointmentSuccessMessage ? (
                 <div className="success-message">
@@ -579,7 +576,6 @@ const CalendarPage = ({ role }) => {
               </button>
             </div>
           </div>
-
           {/* Update/Delete errors */}
           {appointmentErrorMessage && (
             <div className="error-message">{appointmentErrorMessage}</div>
@@ -588,38 +584,42 @@ const CalendarPage = ({ role }) => {
       </div>
       {role === "ADMIN" && (
         <div className="admin-panel">
-        <h2>All Booked Appointments (Admin)</h2>
-        {adminAppointments.map((slot) => (
-          <div key={slot.id} className="appointment-container">
-            <div className="appointment-info">
-              <p>Slot ID: {slot.id}</p>
-              <p>User ID: {slot.userId}</p>
-              <p>Date: {slot.date}</p>
-              <p>Time: {slot.time}</p>
-              <p>Room: {slot.roomNumber}</p>
-              <p>Registrar: {slot.registrarName}</p>
-            </div>
-            <div className="appointment-buttons">
-              <button
-                className="appointment-button"
-                onClick={() =>
-                  handleAdminUpdate(slot.id, {
-                    /* updated data */
-                  })
-                }
-              >
-                Update
-              </button>
-              <button
-                className="appointment-button"
-                onClick={() => handleAdminDelete(slot.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          <h2>All Booked Appointments (Admin)</h2>
+          {adminAppointments.length === 0 ? (
+            <p>No appointments found.</p>
+          ) : (
+            adminAppointments.map((slot) => (
+              <div key={slot.id} className="appointment-container">
+                <div className="appointment-info">
+                  <p>Slot ID: {slot.id}</p>
+                  <p>User ID: {slot.userId}</p> {/* Use slot.userId */}
+                  <p>Date: {slot.date}</p>
+                  <p>Time: {slot.time}</p>
+                  <p>Room: {slot.roomNumber}</p>
+                  <p>Registrar: {slot.registrarName}</p>
+                </div>
+                <div className="appointment-buttons">
+                  <button
+                    className="appointment-button"
+                    onClick={() =>
+                      handleAdminUpdate(slot.id, {
+                        /* updated data */
+                      })
+                    }
+                  >
+                    Update
+                  </button>
+                  <button
+                    className="appointment-button"
+                    onClick={() => handleAdminDelete(slot.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       )}
     </div>
   );
