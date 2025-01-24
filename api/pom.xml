@@ -21,6 +21,10 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
         <!-- Existing dependencies (keep these) -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
