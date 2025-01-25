@@ -21,7 +21,7 @@ const LoginPage = ({ onLogin }) => {
     try {
       // Backend Note: The `/auth/login` endpoint is expected to validate the username and password.
       // It should return a token upon successful authentication or an error message if authentication fails.
-      const response = await fetch("https://cc-book-app-735691842d39.herokuapp.com/auth/login", {
+      const response = await fetch("https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" }, // Backend Note: Ensure the API accepts JSON
         body: JSON.stringify({ username, password }), // Send username and password as JSON
