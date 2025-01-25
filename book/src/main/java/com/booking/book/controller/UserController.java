@@ -27,23 +27,23 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
+        System.out.println("Login request received: " + loginRequest);
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
 
-        // Fetch user from database
         Optional<User> optionalUser = userRepository.findByUsername(username);
-
         if (optionalUser.isEmpty()) {
+            System.out.println("User not found for username: " + username);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid username or password");
         }
 
         User user = optionalUser.get();
+        System.out.println("User found: " + user);
 
-        // Validate password
         if (!user.getPassword().equals(password)) {
+            System.out.println("Invalid password for username: " + username);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid username or password");
         }
-
         // Generate JWT token with additional userId claim
         String token = Jwts.builder()
                 .setSubject(user.getId().toString()) // Use user ID as subject
