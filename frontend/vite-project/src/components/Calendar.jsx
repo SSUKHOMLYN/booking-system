@@ -3,6 +3,8 @@ import Calendar from "react-calendar";
 import { jwtDecode } from "jwt-decode";
 import "../styles/calendar.css";
 
+
+
 const CalendarPage = ({ role }) => {
   const [adminAppointments, setAdminAppointments] = useState([]);
   useEffect(() => {
@@ -14,7 +16,7 @@ const CalendarPage = ({ role }) => {
   const fetchAllAdminAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8081/admin/slots", {
+      const response = await fetch("https://cc-book-app-735691842d39.herokuapp.com/admin/slots", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,7 +37,7 @@ const CalendarPage = ({ role }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:8081/admin/slots/${slotId}`,
+        `https://cc-book-app-735691842d39.herokuapp.com/admin/slots/${slotId}`,
         {
           method: "DELETE",
           headers: {
@@ -60,7 +62,7 @@ const CalendarPage = ({ role }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:8081/admin/slots/${slotId}`,
+        `https://cc-book-app-735691842d39.herokuapp.com/admin/slots/${slotId}`,
         {
           method: "PUT",
           headers: {
@@ -150,7 +152,7 @@ const CalendarPage = ({ role }) => {
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://book-service.herokuapp.com/slots", {
+      const response = await fetch("https://cc-book-app-735691842d39.herokuapp.com/slots", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -257,7 +259,7 @@ const CalendarPage = ({ role }) => {
       }
 
       // Build the new appointment
-      const response = await fetch("https://book-service.herokuapp.com/slots/book", {
+      const response = await fetch("https://cc-book-app-735691842d39.herokuapp.com/slots/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -321,7 +323,7 @@ const CalendarPage = ({ role }) => {
       const newDate = selectedDay;
       const newTime = convertTo24HourFormat(timeSlot);
 
-      const response = await fetch("https://book-service.herokuapp.com/slots/appointment", {
+      const response = await fetch("https://cc-book-app-735691842d39.herokuapp.com/slots/appointment", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -357,7 +359,7 @@ const CalendarPage = ({ role }) => {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://book-service.herokuapp.com/slots/appointment/delete",
+        "https://cc-book-app-735691842d39.herokuapp.com/slots/appointment/delete",
         {
           method: "DELETE",
           headers: {
