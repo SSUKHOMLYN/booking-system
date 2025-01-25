@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -jar api/target/api-1.0.0.jar
+web: cd api && java -Dserver.port=$PORT -jar target/api-1.0.0.jar
