@@ -13,12 +13,16 @@ public class Slots {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "slot_id") // Matches the database column name
     private Long id;
 
     private LocalDate date;
     private LocalTime time;
 
+    @Column(name = "room_number")
     private String roomNumber;
+
+    @Column(name = "registrar_name")
     private String registrarName;
 
     @Enumerated(EnumType.STRING)
@@ -26,7 +30,8 @@ public class Slots {
 
     @OneToOne
     @JsonManagedReference
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", unique = true, nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", unique = true, nullable = false) // One-to-One
+                                                                                                     // mapping
     private User user;
 
     // Getters and Setters

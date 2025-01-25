@@ -13,7 +13,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "user_id") // Matches the database column name
     private Long userId;
 
     @Column(name = "u_role")
@@ -26,7 +26,7 @@ public class User {
     private String password;
 
     @JsonBackReference
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true) // One-to-One mapping
     private Slots appointment;
 
     // Getters and Setters
