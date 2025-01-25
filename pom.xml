@@ -10,9 +10,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>api</module>
 		<module>book</module>
-		<module>frontend</module>
 	</modules>
 
 	<parent>
