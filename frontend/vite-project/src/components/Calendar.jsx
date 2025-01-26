@@ -3,8 +3,6 @@ import Calendar from "react-calendar";
 import { jwtDecode } from "jwt-decode";
 import "../styles/calendar.css";
 
-
-
 const CalendarPage = ({ role }) => {
   const [adminAppointments, setAdminAppointments] = useState([]);
   useEffect(() => {
@@ -16,11 +14,14 @@ const CalendarPage = ({ role }) => {
   const fetchAllAdminAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/admin/slots", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/admin/slots",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch all admin slots");
       }
@@ -32,7 +33,6 @@ const CalendarPage = ({ role }) => {
     }
   };
 
-  // Admin can delete any slot
   const handleAdminDelete = async (slotId) => {
     try {
       const token = localStorage.getItem("token");
@@ -56,8 +56,6 @@ const CalendarPage = ({ role }) => {
     }
   };
 
-  // Admin can update any slot
-  // you’d likely let them pick new date/time in a form
   const handleAdminUpdate = async (slotId, updatedData) => {
     try {
       const token = localStorage.getItem("token");
@@ -73,7 +71,7 @@ const CalendarPage = ({ role }) => {
         }
       );
       if (response.ok) {
-        alert("Admin: Slot updated successfully!"); // Add this
+        alert("Admin: Slot updated successfully!");
         fetchAllAdminAppointments();
       } else {
         alert("Failed to update slot");
@@ -86,7 +84,6 @@ const CalendarPage = ({ role }) => {
   const [selectedDay, setSelectedDay] = useState(null);
   const [timeSlot, setTimeSlot] = useState("");
 
-  // Separate error messages for booking vs. appointment
   const [bookingErrorMessage, setBookingErrorMessage] = useState("");
   const [appointmentErrorMessage, setAppointmentErrorMessage] = useState("");
   const [appointmentSuccessMessage, setAppointmentSuccessMessage] =
@@ -95,13 +92,11 @@ const CalendarPage = ({ role }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
 
-  // Store the user's existing appointment
   const [userAppointment, setUserAppointment] = useState(null);
 
   const [username, setUsername] = useState("");
   const [userid, setUserid] = useState(null);
 
-  // Fetch current date from worldtimeapi OR fallback to local time
   const fetchCurrentDate = async () => {
     try {
       const response = await fetch(
@@ -114,12 +109,10 @@ const CalendarPage = ({ role }) => {
       setCurrentDate(new Date());
     } catch (error) {
       console.error("Error fetching current date:", error);
-      // fallback to local system date
       setCurrentDate(new Date());
     }
   };
 
-  // Decode JWT token
   const extractUserIdFromToken = () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -127,7 +120,6 @@ const CalendarPage = ({ role }) => {
         const decodedToken = jwtDecode(token);
         console.log(decodedToken);
         setUsername(decodedToken.username);
-        // Some tokens store ID in `sub`, others in custom field
         setUserid(Number(decodedToken.sub || decodedToken.userid));
       } catch (error) {
         console.error("Failed to decode token:", error);
@@ -135,29 +127,29 @@ const CalendarPage = ({ role }) => {
     }
   };
 
-  // On mount, do 2 things: fetch date, decode token
   useEffect(() => {
     fetchCurrentDate();
     extractUserIdFromToken();
   }, []);
 
-  // Whenever `userid` changes, fetch appointments
   useEffect(() => {
     if (userid) {
       fetchAppointments();
     }
   }, [userid]);
 
-  // Fetch all appointments
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/slots", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/slots",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -187,36 +179,33 @@ const CalendarPage = ({ role }) => {
     }
   };
 
-  // Called when user clicks a calendar day
   const handleDayClick = (clickedDate) => {
-    // Clear messages
     setBookingErrorMessage("");
     setAppointmentErrorMessage("");
     setAppointmentSuccessMessage("");
 
-    // Convert to ISO date string (YYYY-MM-DD)
-    const isoDate = clickedDate.toISOString().split("T")[0];
-    const today = new Date().toISOString().split("T")[0];
-
-    // Prevent selecting past or same-day
-    if (isoDate <= today) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (clickedDate <= today) {
       setBookingErrorMessage("Booking unavailable for the selected date.");
       setSelectedDay(null);
       return;
     }
 
-    // Update state with ISO formatted date
-    setSelectedDay(isoDate);
+    const year = clickedDate.getFullYear();
+    const month = String(clickedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(clickedDate.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+
+    setSelectedDay(formattedDate);
     setTimeSlot("");
     setCurrentDate(clickedDate);
   };
-  
-  // “Today” button
+
   const handleTodayClick = () => {
     setCurrentDate(new Date());
   };
 
-  // Month/year dropdown changes
   const handleMonthChange = (e) => {
     const selectedMonth = parseInt(e.target.value, 10);
     setCurrentDate(
@@ -231,7 +220,6 @@ const CalendarPage = ({ role }) => {
     );
   };
 
-  // Book a new appointment
   const handleBookAppointment = async () => {
     try {
       setBookingErrorMessage("");
@@ -240,13 +228,11 @@ const CalendarPage = ({ role }) => {
 
       const token = localStorage.getItem("token");
 
-      // If user already has an appointment
       if (userAppointment) {
         setBookingErrorMessage("You already have an appointment.");
         return;
       }
 
-      // If this date/time is taken
       const convertedTime = convertTo24HourFormat(timeSlot);
       const isTaken = appointments.some(
         (app) => app.date === selectedDay && app.time === convertedTime
@@ -259,21 +245,24 @@ const CalendarPage = ({ role }) => {
       }
 
       // Build the new appointment
-      const response = await fetch("https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/slots/book", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          date: selectedDay,
-          time: convertedTime,
-          username,
-          roomNumber: generateRoomNumber(),
-          registrarName: "Registrar Name",
-          status: "BOOKED",
-        }),
-      });
+      const response = await fetch(
+        "https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/slots/book",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            date: selectedDay,
+            time: convertedTime,
+            username,
+            roomNumber: generateRoomNumber(),
+            registrarName: "Registrar Name",
+            status: "BOOKED",
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -302,7 +291,6 @@ const CalendarPage = ({ role }) => {
     }
   };
 
-  // Update existing appointment
   const handleUpdateAppointment = async () => {
     try {
       setAppointmentErrorMessage("");
@@ -323,14 +311,17 @@ const CalendarPage = ({ role }) => {
       const newDate = selectedDay;
       const newTime = convertTo24HourFormat(timeSlot);
 
-      const response = await fetch("https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/slots/appointment", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ date: newDate, time: newTime }),
-      });
+      const response = await fetch(
+        "https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/slots/appointment",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ date: newDate, time: newTime }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -347,7 +338,6 @@ const CalendarPage = ({ role }) => {
     }
   };
 
-  // Cancel (delete) existing appointment
   const handleCancelAppointment = async () => {
     try {
       setAppointmentErrorMessage("");
@@ -488,21 +478,19 @@ const CalendarPage = ({ role }) => {
             value={currentDate}
             onClickDay={handleDayClick}
             tileClassName={({ date }) => {
-              // highlight current day
               if (date.toDateString() === new Date().toDateString()) {
                 return "react-calendar__tile--now";
               }
 
-              // Highlight selected day (compare local dates)
               const tileYear = date.getFullYear();
               const tileMonth = String(date.getMonth() + 1).padStart(2, "0");
               const tileDay = String(date.getDate()).padStart(2, "0");
               const tileDateStr = `${tileYear}-${tileMonth}-${tileDay}`;
 
-              // highlight user-selected day
               if (selectedDay === tileDateStr) {
                 return "react-calendar__tile--user-selected";
               }
+
               return null;
             }}
             showNavigation={false}
