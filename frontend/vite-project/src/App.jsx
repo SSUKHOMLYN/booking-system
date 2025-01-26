@@ -42,7 +42,7 @@ const App = () => {
         <Routes>
           {/* Public Login Route */}
           <Route
-            path="/login"
+            path="/"
             element={
               isLoggedIn ? <Navigate to="/" /> : <Login onLogin={handleLogin} />
             }
