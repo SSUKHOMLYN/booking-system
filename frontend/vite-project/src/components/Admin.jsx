@@ -1,172 +1,192 @@
-import React, { useState, useEffect } from 'react';
-import "../styles/admin.css";
+import React, { useState, useEffect } from "react";
 
 const Admin = () => {
-  const [users, setUsers] = useState([]);
-  const [selectedDay, setSelectedDay] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState('');
+  const [slots, setSlots] = useState([]);
+  const [editSlotId, setEditSlotId] = useState(null);
 
-  // Fetch users from database
+  // Form fields for editing
+  const [editDate, setEditDate] = useState("");
+  const [editTime, setEditTime] = useState("");
+
+  // Fetch all slots on mount
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchSlots = async () => {
       try {
-        const response = await fetch('/api/users');
+        // Optionally include an Authorization header if needed
+        // const token = localStorage.getItem("token");
+        const response = await fetch("/admin/slots", {
+          // headers: {
+          //   Authorization: `Bearer ${token}`
+          // }
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch slots");
+        }
         const data = await response.json();
-        setUsers(data);
+        setSlots(data);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching slots:", error);
       }
     };
-    fetchUsers();
+
+    fetchSlots();
   }, []);
 
-  // Generate time options (07:00 AM - 10:30 PM with 30min intervals)
-  const generateTimeOptions = () => {
-    const times = [];
-    let startTime = 7 * 60; // 7:00 AM in minutes
-    const endTime = 22 * 60 + 30; // 10:30 PM in minutes
-
-    while (startTime <= endTime) {
-      const hours = Math.floor(startTime / 60);
-      const minutes = startTime % 60;
-      const period = hours >= 12 ? 'PM' : 'AM';
-      const formattedHours = hours % 12 || 12;
-      const timeString = `${formattedHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
-      
-      times.push(<option key={startTime} value={timeString}>{timeString}</option>);
-      startTime += 30;
+  // Handle delete (cancel)
+  const handleDelete = async (slotId) => {
+    if (!window.confirm("Are you sure you want to cancel this appointment?")) {
+      return;
     }
 
-    return times;
+    try {
+      // const token = localStorage.getItem("token");
+      const response = await fetch(`/admin/slots/${slotId}`, {
+        method: "DELETE",
+        // headers: {
+        //   Authorization: `Bearer ${token}`
+        // }
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete slot");
+      }
+      // Remove the deleted slot from the UI
+      setSlots(slots.filter((slot) => slot.id !== slotId));
+      alert("Appointment canceled successfully.");
+    } catch (error) {
+      console.error("Error deleting slot:", error);
+      alert("Failed to cancel the appointment. Please try again.");
+    }
   };
 
-  const handleUpdate = async () => {
-    // Combine date and time into a single datetime object
-    const appointmentDate = new Date(
-      `${selectedYear}-${selectedMonth.padStart(2, '0')}-${selectedDay.padStart(2, '0')}T${selectedTime}`
-    );
+  // Begin editing a slot
+  const handleEdit = (slot) => {
+    setEditSlotId(slot.id);
+    // Initialize form fields with slot's current values
+    setEditDate(slot.date);
+    setEditTime(slot.time);
+  };
 
-    // Send update to backend
+  // Save changes to a slot (PUT request)
+  const handleSave = async (e) => {
+    e.preventDefault();
     try {
-      const response = await fetch('/api/appointments', {
-        method: 'PUT',
+      // const token = localStorage.getItem("token");
+      const response = await fetch(`/admin/slots/${editSlotId}`, {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
+          // Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          userId: selectedUserId,
-          datetime: appointmentDate.toISOString(),
+          id: editSlotId, // must include ID if your backend requires it
+          date: editDate,
+          time: editTime,
+          // ...any other fields your Slots model needs
         }),
       });
 
-      if (response.ok) {
-        alert('Appointment updated successfully');
-        // Reset form or navigate away
+      if (!response.ok) {
+        const msg = await response.text();
+        throw new Error(msg);
       }
+
+      const updatedSlot = await response.json();
+      // Update the slot in our local state
+      setSlots((prevSlots) =>
+        prevSlots.map((slot) => (slot.id === editSlotId ? updatedSlot : slot))
+      );
+      // Clear edit form
+      setEditSlotId(null);
+      setEditDate("");
+      setEditTime("");
+      alert("Appointment updated successfully. User will be notified!");
     } catch (error) {
-      console.error('Error updating appointment:', error);
+      console.error("Error updating slot:", error);
+      alert("Failed to update the appointment. Please try again.");
     }
   };
 
-  const handleCancel = () => {
-    // Reset form or navigate back
-    setSelectedDay('');
-    setSelectedMonth('');
-    setSelectedYear('');
-    setSelectedTime('');
-    setSelectedUserId('');
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditSlotId(null);
+    setEditDate("");
+    setEditTime("");
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Admin Appointment Management</h1>
-      
-      <div className="space-y-4">
-        {/* Date Selection */}
-        <div className="flex gap-4">
-          <select 
-            value={selectedDay}
-            onChange={(e) => setSelectedDay(e.target.value)}
-            className="flex-1 p-2 border rounded"
-            required
-          >
-            <option value="">Day</option>
-            {Array.from({length: 31}, (_, i) => (
-              <option key={i+1} value={i+1}>{i+1}</option>
-            ))}
-          </select>
+    <div style={{ padding: "20px" }}>
+      <h1>Admin - All Booked Appointments</h1>
 
-          <select 
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="flex-1 p-2 border rounded"
-            required
-          >
-            <option value="">Month</option>
-            {Array.from({length: 12}, (_, i) => (
-              <option key={i+1} value={i+1}>
-                {new Date(0, i).toLocaleString('default', {month: 'long'})}
-              </option>
-            ))}
-          </select>
-
-          <select 
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-            className="flex-1 p-2 border rounded"
-            required
-          >
-            <option value="">Year</option>
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-          </select>
-        </div>
-
-        {/* Time Selection */}
-        <select
-          value={selectedTime}
-          onChange={(e) => setSelectedTime(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        >
-          <option value="">Select Time</option>
-          {generateTimeOptions()}
-        </select>
-
-        {/* User Selection */}
-        <select
-          value={selectedUserId}
-          onChange={(e) => setSelectedUserId(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        >
-          <option value="">Select User</option>
-          {users.map(user => (
-            <option key={user.id} value={user.id}>
-              {user.name} ({user.email})
-            </option>
+      <table border="1" cellPadding="10" style={{ borderCollapse: "collapse", width: "100%" }}>
+        <thead>
+          <tr>
+            <th>Slot ID</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>User</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {slots.map((slot) => (
+            <tr key={slot.id}>
+              <td>{slot.id}</td>
+              <td>{slot.date}</td>
+              <td>{slot.time}</td>
+              <td>
+                {slot.user
+                  ? `${slot.user.name} (${slot.user.email})`
+                  : "Unknown User"}
+              </td>
+              <td>
+                {/* If this slot is currently being edited, show a "Editing..." message instead of the Edit button */}
+                {editSlotId === slot.id ? (
+                  <span style={{ color: "orange" }}>Editing...</span>
+                ) : (
+                  <button onClick={() => handleEdit(slot)}>Edit</button>
+                )}{" "}
+                <button onClick={() => handleDelete(slot.id)}>Delete</button>
+              </td>
+            </tr>
           ))}
-        </select>
+        </tbody>
+      </table>
 
-        {/* Action Buttons */}
-        <div className="flex gap-4 mt-6">
-          <button
-            onClick={handleUpdate}
-            className="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-          >
-            Update
-          </button>
-          <button
-            onClick={handleCancel}
-            className="flex-1 bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
-          >
-            Cancel
-          </button>
+      {/* Editing Form */}
+      {editSlotId && (
+        <div style={{ marginTop: "20px" }}>
+          <h2>Edit Slot</h2>
+          <form onSubmit={handleSave}>
+            <div style={{ marginBottom: "10px" }}>
+              <label htmlFor="date">Date: </label>
+              <input
+                type="date"
+                id="date"
+                value={editDate}
+                onChange={(e) => setEditDate(e.target.value)}
+                required
+              />
+            </div>
+
+            <div style={{ marginBottom: "10px" }}>
+              <label htmlFor="time">Time: </label>
+              <input
+                type="time"
+                id="time"
+                value={editTime}
+                onChange={(e) => setEditTime(e.target.value)}
+                required
+              />
+            </div>
+
+            <button type="submit">Save Changes</button>
+            <button type="button" onClick={handleCancelEdit} style={{ marginLeft: "10px" }}>
+              Cancel
+            </button>
+          </form>
         </div>
-      </div>
+      )}
     </div>
   );
 };
