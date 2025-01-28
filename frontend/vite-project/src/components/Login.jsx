@@ -50,7 +50,7 @@ const LoginPage = ({ onLogin }) => {
       }
 
       // If your server attaches user info as `data.user`, ensure it has a role
-      if (!data.user || !data.user.uRole) {
+      if (!data.user || !data.user.role) {
         throw new Error("No user role returned from server. Please contact support.");
       }
 
@@ -58,7 +58,7 @@ const LoginPage = ({ onLogin }) => {
       localStorage.setItem("token", data.token);
 
       // Notify parent component that login succeeded; pass token + role
-      onLogin(data.token, data.user.uRole);
+      onLogin(data.token, data.user.role);
     } catch (err) {
       // Handle either fetch or parse or custom errors
       setError(err.message || "Failed to login. Please try again.");
