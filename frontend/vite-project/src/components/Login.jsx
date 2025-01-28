@@ -2,52 +2,69 @@ import React, { useState } from "react";
 import "../styles/login.css";
 
 const LoginPage = ({ onLogin }) => {
-  const [username, setUsername] = useState(""); // Stores the user's input for the username
-  const [password, setPassword] = useState(""); // Stores the user's input for the password
-  const [showPassword, setShowPassword] = useState(false); // Toggles visibility of the password field
-  const [error, setError] = useState(""); // Stores error messages received during login
-  const [isLoggingIn, setIsLoggingIn] = useState(false); // Tracks the state of the login process
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // Toggles between showing and hiding the password in the input field
+  // Toggle between showing/hiding the password
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
-  // Handles the login logic, including communication with the backend API
-  const handleLogin = async () => {
-    setIsLoggingIn(true); // Indicates login is in progress
-    setError(""); // Clear any previous errors
+  // Submit the login form
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent page reload
+    setIsLoggingIn(true);
+    setError("");
 
     try {
-      // Backend Note: The `/auth/login` endpoint is expected to validate the username and password.
-      // It should return a token upon successful authentication or an error message if authentication fails.
-      const response = await fetch("https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }, // Backend Note: Ensure the API accepts JSON
-        body: JSON.stringify({ username, password }), // Send username and password as JSON
-      });
+      const response = await fetch(
+        "https://cc-api-gateway-77eb02bcc7e1.herokuapp.com/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        }
+      );
 
-      if (response.ok) {
-        // Backend Note: The response should include a token for user authentication.
-        const data = await response.json();
-        localStorage.setItem("token", data.token); // Store the token in localStorage for future API calls
-        onLogin(data.token, data.user.uRole); // Notify the parent component about the successful login
-      } else {
-        // Backend Note: The server should provide a user-friendly error message for failed login attempts.
-        setError(await response.text());
+      // Try to parse the JSON response
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        throw new Error("Failed to parse server response.");
       }
-    } catch {
-      // Backend Note: Handle unexpected issues, such as network errors or server downtime.
-      setError("Failed to login. Please try again.");
-    } finally {
-      setIsLoggingIn(false); // Reset the login state after the process is complete
-    }
-  };
 
-  // Handles form submission and prevents the default page reload
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
-    handleLogin(); // Trigger the login logic
+      // Check if the response is OK and data includes a token
+      if (!response.ok) {
+        // If backend returns a text error, we can also try:
+        // const message = await response.text();
+        // throw new Error(message);
+        throw new Error(data.message || "Login failed. Please try again.");
+      }
+
+      if (!data.token) {
+        throw new Error("No token returned from server. Please contact support.");
+      }
+
+      // If your server attaches user info as `data.user`, ensure it has a role
+      if (!data.user || !data.user.uRole) {
+        throw new Error("No user role returned from server. Please contact support.");
+      }
+
+      // Store the token (and possibly user info) in localStorage
+      localStorage.setItem("token", data.token);
+
+      // Notify parent component that login succeeded; pass token + role
+      onLogin(data.token, data.user.uRole);
+    } catch (err) {
+      // Handle either fetch or parse or custom errors
+      setError(err.message || "Failed to login. Please try again.");
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -56,10 +73,11 @@ const LoginPage = ({ onLogin }) => {
         <h1 className="login-title">Welcome Back</h1>
         <p className="login-subtitle">Please log in to continue</p>
 
-        {/* Display error messages received during the login process */}
+        {/* Display error messages */}
         {error && <p className="error-message">{error}</p>}
 
         <form onSubmit={handleSubmit}>
+          {/* USERNAME */}
           <div className="form-group">
             <label htmlFor="username" className="form-label">
               Username
@@ -71,42 +89,42 @@ const LoginPage = ({ onLogin }) => {
               placeholder="Enter your username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required // Backend Note: Ensure the username field is not empty when sending the request
+              required
             />
           </div>
 
+          {/* PASSWORD */}
           <div className="form-group">
             <label htmlFor="password" className="form-label">
               Password
             </label>
             <div className="password-container">
               <input
-                type={showPassword ? "text" : "password"} // Toggles input type for password visibility
+                type={showPassword ? "text" : "password"}
                 id="password"
                 className="login-input password-input"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required // Backend Note: Ensure the password field is not empty when sending the request
+                required
               />
               <button
                 type="button"
                 className="show-password-btn"
                 onClick={togglePasswordVisibility}
               >
-                {showPassword ? "Hide" : "Show"}{" "}
-                {/* Dynamically toggles button label */}
+                {showPassword ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             className="login-button"
-            disabled={isLoggingIn} // Disable the button during login to prevent multiple requests
+            disabled={isLoggingIn}
           >
-            {isLoggingIn ? "Logging in..." : "Log In"}{" "}
-            {/* Button text updates based on login state */}
+            {isLoggingIn ? "Logging in..." : "Log In"}
           </button>
         </form>
       </div>
