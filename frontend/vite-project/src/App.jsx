@@ -2,32 +2,41 @@ import React, { useState } from "react";
 import Login from "./components/Login";
 import NavBar from "./components/NavBar";
 import Calendar from "./components/Calendar";
+import Admin from "./components/Admin"; // <-- import Admin
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userId, setUserId] = useState(null); // Track the logged-in user's ID
-
+  const [userId, setUserId] = useState(null);
   const [role, setRole] = useState(null);
 
   const handleLogin = (token, userRole) => {
-    // decode token if needed, or directly pass userRole
-    setRole(userRole);
+    // decode token or directly use userRole
+    setRole(userRole);    // e.g. "ADMIN"
     setIsLoggedIn(true);
+    // if you also want to store userId from the login response, do it here
+    // setUserId(userIdFromServer);
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false); // Log the user out and return to Login page
-    setUserId(null); // Clear the userId
+    setIsLoggedIn(false);
+    setUserId(null);
+    setRole(null);
+    localStorage.removeItem("token"); // Clear token if needed
   };
 
   return (
     <div>
       <NavBar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
       <main>
-        {isLoggedIn ? (
-          <Calendar userId={userId} /> // Pass the userId to the Calendar component
+        {!isLoggedIn ? (
+          // Not logged in => show Login
+          <Login onLogin={handleLogin} />
+        ) : role === "ADMIN" ? (
+          // If logged in AND role is admin => show Admin page
+          <Admin />
         ) : (
-          <Login onLogin={handleLogin} /> // Pass the login handler to Login
+          // Otherwise => show Calendar for normal users
+          <Calendar userId={userId} />
         )}
       </main>
     </div>
